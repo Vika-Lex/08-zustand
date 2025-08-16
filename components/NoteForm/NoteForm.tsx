@@ -4,12 +4,16 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import * as NoteService from "@/lib/api";
 import * as yup from 'yup';
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import {useNoteDraftStore} from "@/lib/store/noteStore";
 
 interface NoteFormProps {
     onClear: () => void,
 }
+
 const NoteForm = ({onClear}: NoteFormProps) => {
     const queryClient = useQueryClient();
+
+    const {draft, setDraft, clearDraft} = useNoteDraftStore()
 
     const mutation = useMutation({
         mutationFn: NoteService.createNote,
@@ -18,6 +22,7 @@ const NoteForm = ({onClear}: NoteFormProps) => {
                 queryKey: ['notes'],
             });
             onClear();
+            clearDraft();
         },
         onError: (error) => {
             console.error('Error creating note:', error);
@@ -38,9 +43,9 @@ const NoteForm = ({onClear}: NoteFormProps) => {
 
     const formik = useFormik({
         initialValues: {
-            title: '',
-            content: '',
-            tag: 'Todo',
+            title: draft.title,
+            content: draft.content,
+            tag: draft.tag
         },
 
         validationSchema: validationSchema,
@@ -50,10 +55,19 @@ const NoteForm = ({onClear}: NoteFormProps) => {
         },
     })
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        formik.handleChange(e);
+        const {name, value} = e.target;
+        const updatedDraft = {
+            ...draft,
+            [name]: value,
+        }
+        setDraft(updatedDraft);
 
-const isError = (key:string)=> {
+    }
+    const isError = (key: string) => {
         return Object.hasOwn(formik.errors, key);
-}
+    }
 
     return (
         <form className={css.form}
@@ -65,14 +79,14 @@ const isError = (key:string)=> {
                        type="text"
                        name="title"
                        value={formik.values.title}
-                       onChange={formik.handleChange}
+                       onChange={handleChange}
                        className={css.input}
                 />
 
 
                 {isError('title') && (
                     <ErrorMessage message={formik.errors.title as string}/>
-                  )}
+                )}
             </div>
 
             <div className={css.formGroup}>
@@ -81,13 +95,13 @@ const isError = (key:string)=> {
                     id="content"
                     name="content"
                     value={formik.values.content}
-                    onChange={formik.handleChange}
+                    onChange={handleChange}
                     rows={8}
                     className={css.textarea}
                 />
 
                 {isError('content') && (
-                    <ErrorMessage message={formik.errors.content as string} />
+                    <ErrorMessage message={formik.errors.content as string}/>
                 )}
             </div>
 
@@ -96,7 +110,7 @@ const isError = (key:string)=> {
                 <select id="tag"
                         name="tag"
                         value={formik.values.tag}
-                        onChange={formik.handleChange}
+                        onChange={handleChange}
                         className={css.select}
                 >
                     <option value="Todo">Todo</option>
@@ -107,7 +121,7 @@ const isError = (key:string)=> {
                 </select>
 
                 {isError('tag') && (
-                    <ErrorMessage message={formik.errors.tag as string} />
+                    <ErrorMessage message={formik.errors.tag as string}/>
                 )}
             </div>
 

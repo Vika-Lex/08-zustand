@@ -1,5 +1,9 @@
 import css from './page.module.css';
+import {Metadata} from "next";
 
+export const metadata:Metadata = {
+    title: 'NoteHub - Your Personal Note Manager',
+}
 const Home = () => {
     return (
 

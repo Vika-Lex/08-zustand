@@ -5,11 +5,8 @@ import {formatDate} from "@/lib/date";
 import {useQuery} from "@tanstack/react-query";
 import * as NoteService from "@/lib/api";
 import {useParams} from "next/navigation";
+import Image from "next/image";
 
-
-// interface NoteDetailsProps {
-//     initialData: Note,
-// }
 const NoteDetailsClient = () => {
 const {id} = useParams() as {id: string};
 
@@ -36,6 +33,11 @@ const {id} = useParams() as {id: string};
                        <p className={css.date}>{formatDate(noteById.createdAt)}</p>
 
                    </div>
+                   {/*<Image  src='https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg'*/}
+                   {/*     alt=''*/}
+                   {/*     width={200}*/}
+                   {/*     height={200}*/}
+                   {/*/>*/}
                </div>
            )}
        </>
