@@ -1,92 +1,62 @@
+'use client'
+
 import css from './NoteForm.module.css';
-import {useFormik} from "formik";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import * as NoteService from "@/lib/api";
-import * as yup from 'yup';
-import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import {useNoteDraftStore} from "@/lib/store/noteStore";
+import { useRouter } from 'next/navigation';
 
-interface NoteFormProps {
-    onClear: () => void,
-}
-
-const NoteForm = ({onClear}: NoteFormProps) => {
+const NoteForm = () => {
+    const router = useRouter();
     const queryClient = useQueryClient();
 
     const {draft, setDraft, clearDraft} = useNoteDraftStore()
 
     const mutation = useMutation({
         mutationFn: NoteService.createNote,
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({
-                queryKey: ['notes'],
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['notes']
             });
-            onClear();
             clearDraft();
+            router.back()
         },
         onError: (error) => {
             console.error('Error creating note:', error);
         },
     })
 
-    const validationSchema = yup.object({
-        title: yup.string()
-            .required('Title is required')
-            .min(3, 'Title must be at least 3 characters')
-            .max(50, 'Title must be at most 50 characters'),
-        content: yup.string()
-            .max(500, 'Content must be at most 500 characters'),
-        tag: yup.string()
-            .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'], 'Invalid tag')
-            .required('Tag is required'),
-    });
-
-    const formik = useFormik({
-        initialValues: {
-            title: draft.title,
-            content: draft.content,
-            tag: draft.tag
-        },
-
-        validationSchema: validationSchema,
-
-        onSubmit: (values) => {
-            mutation.mutate(values)
-        },
-    })
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        formik.handleChange(e);
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const {name, value} = e.target;
         const updatedDraft = {
             ...draft,
             [name]: value,
         }
         setDraft(updatedDraft);
+    }
 
-    }
-    const isError = (key: string) => {
-        return Object.hasOwn(formik.errors, key);
-    }
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log('draft', draft)
+        mutation.mutate(draft);
+    };
+
+
 
     return (
         <form className={css.form}
-              onSubmit={formik.handleSubmit}
+              onSubmit={handleSubmit}
         >
             <div className={css.formGroup}>
                 <label htmlFor="title">Title</label>
                 <input id="title"
                        type="text"
                        name="title"
-                       value={formik.values.title}
+                       value={draft.title}
                        onChange={handleChange}
                        className={css.input}
                 />
 
-
-                {isError('title') && (
-                    <ErrorMessage message={formik.errors.title as string}/>
-                )}
             </div>
 
             <div className={css.formGroup}>
@@ -94,22 +64,18 @@ const NoteForm = ({onClear}: NoteFormProps) => {
                 <textarea
                     id="content"
                     name="content"
-                    value={formik.values.content}
+                    value={draft.content}
                     onChange={handleChange}
                     rows={8}
                     className={css.textarea}
                 />
-
-                {isError('content') && (
-                    <ErrorMessage message={formik.errors.content as string}/>
-                )}
             </div>
 
             <div className={css.formGroup}>
                 <label htmlFor="tag">Tag</label>
                 <select id="tag"
                         name="tag"
-                        value={formik.values.tag}
+                        value={draft.tag}
                         onChange={handleChange}
                         className={css.select}
                 >
@@ -119,16 +85,12 @@ const NoteForm = ({onClear}: NoteFormProps) => {
                     <option value="Meeting">Meeting</option>
                     <option value="Shopping">Shopping</option>
                 </select>
-
-                {isError('tag') && (
-                    <ErrorMessage message={formik.errors.tag as string}/>
-                )}
             </div>
 
             <div className={css.actions}>
                 <button type="button"
                         className={css.cancelButton}
-                        onClick={onClear}
+                        onClick={()=> router.back()}
                 >
                     Cancel
                 </button>
@@ -141,7 +103,6 @@ const NoteForm = ({onClear}: NoteFormProps) => {
                 </button>
             </div>
         </form>
-
     );
 };
 export default NoteForm

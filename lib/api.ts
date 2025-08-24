@@ -39,7 +39,6 @@ export const getAllNotes = async (
             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
         },
     });
-    console.log(data)
     return data;
 }
 

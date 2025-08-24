@@ -17,6 +17,7 @@ const NotesSidebar = () => {
                     </li>
                 ))}
             </ul>
+            <Link href={'/note/action/create'}>Create new note</Link>
         </>
     );
 };
