@@ -2,7 +2,6 @@
 import NoteForm from "@/components/NoteForm/NoteForm";
 import css from './CreateNote.module.css'
 
-
 function CreateNoteClient() {
     return (
         <div className={css.container}>
