@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import CreateNoteClient from './СreateNote.client';
+import CreateNoteClient from './CreateNote.client';
 
 export const metadata: Metadata = {
     title: 'Create Note - NoteHub',
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'Create Note - NoteHub',
         description: 'Start a new note in NoteHub — add a title, write content, and manage it with tags.',
-        url: '/notes/action/create',
+        url: 'https://notehub.com/notes/action/create',
         images: [
             {
                 url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
